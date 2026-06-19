@@ -15,12 +15,10 @@ export const CONFIG = {
   START_BALANCE: 1000,
   BET_AMOUNT: 10,
 
-  SYMBOLS: ["EMU", "KANGAROO", "🍊", "⭐", "💎"],
+  SYMBOLS: ["EMU", "KANGAROO", "💎"],
 
   PAYOUTS: {
     "💎": 50,
-    "⭐": 20,
-    "🍊": 10,
     KANGAROO: 8,
     EMU: 5,
   },

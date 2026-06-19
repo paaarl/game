@@ -1,6 +1,55 @@
 export class AudioManager {
   constructor() {
     this.ctx = new AudioContext();
+    this.musicBuffer = null;
+    this.musicSource = null;
+    this.musicGain = null;
+    this.musicStarted = false;
+  }
+
+  async loadMusic(url) {
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      this.musicBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+    } catch (err) {
+      console.warn("Не вдалось завантажити фонову музику:", err);
+    }
+  }
+
+  playMusic(volume = 0.1) {
+    if (!this.musicBuffer || this.musicStarted) return;
+
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume();
+    }
+
+    this.musicSource = this.ctx.createBufferSource();
+    this.musicSource.buffer = this.musicBuffer;
+    this.musicSource.loop = true;
+
+    this.musicGain = this.ctx.createGain();
+    this.musicGain.gain.setValueAtTime(volume, this.ctx.currentTime);
+
+    this.musicSource.connect(this.musicGain);
+    this.musicGain.connect(this.ctx.destination);
+
+    this.musicSource.start(0);
+    this.musicStarted = true;
+  }
+
+  stopMusic() {
+    if (this.musicSource) {
+      this.musicSource.stop();
+      this.musicSource = null;
+      this.musicStarted = false;
+    }
+  }
+
+  setMusicVolume(volume) {
+    if (this.musicGain) {
+      this.musicGain.gain.setValueAtTime(volume, this.ctx.currentTime);
+    }
   }
 
   _playTone(frequency, duration, type = "sine", volume = 0.3) {

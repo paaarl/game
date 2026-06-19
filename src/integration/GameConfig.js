@@ -27,6 +27,8 @@ export class GameScene {
     this.winMessage = new WinMessage();
     this.audio = new AudioManager();
 
+    this.audio.loadMusic("public/assets/bg-music.mp3");
+
     this.balanceUI.onBetChange(
       () => {
         this.gameState.increaseBet();
@@ -47,11 +49,9 @@ export class GameScene {
 
       if (winResult.win) {
         this.audio.playWin();
-
         this.winMessage.show(winResult.symbol, winResult.payout);
 
         this.reelSet.reels.forEach((reel) => {
-          const getVisibleSymbols = reel.getVisibleSymbols();
           const middleSymbol = reel.symbols.find(
             (s) =>
               s.container.y >= CONFIG.SYMBOL_SIZE &&
@@ -66,6 +66,8 @@ export class GameScene {
 
     this.spinButton.onClick = () => {
       if (!this.gameState.canSpin()) return;
+
+      this.audio.playMusic();
       this.audio.playSpin();
 
       this.gameState.startSpin();
@@ -73,6 +75,7 @@ export class GameScene {
       this.spinButton.setEnabled(false);
       this.reelSet.spin();
     };
+
     this.container.addChild(this.reelBackground.container);
     this.container.addChild(this.reelSet.container);
     this.container.addChild(this.winLine.container);
@@ -85,6 +88,7 @@ export class GameScene {
     this.app.ticker.add((ticker) => {
       this.reelSet.update(ticker.deltaTime, ticker.deltaMS);
     });
+
     this.reelSet.reels.forEach((reel) => {
       reel.onStop = () => {
         this.audio.playTick();
