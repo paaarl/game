@@ -1,6 +1,10 @@
-import { Application } from "pixi.js";
+import "./style.css";
+import { Application, Assets } from "pixi.js";
+import "@esotericsoftware/spine-pixi-v8";
+import { Spine } from "@esotericsoftware/spine-pixi-v8";
 import { CONFIG } from "./config.js";
 import { GameScene } from "./integration/GameConfig.js";
+import { spinePool } from "./objects/Symbol.js";
 
 const app = new Application();
 
@@ -8,10 +12,42 @@ await app.init({
   width: CONFIG.SCREEN_WIDTH,
   height: CONFIG.SCREEN_HEIGHT,
   background: 0x1a1a2e,
+  resolution: Math.min(window.devicePixelRatio || 1, 2),
+  autoDensity: true,
 });
 
-document.getElementById("app").appendChild(app.canvas);
+app.canvas.style.width = "100%";
+app.canvas.style.height = "100%";
+
+await Assets.load([
+  { alias: "emu-atlas", src: "assets/Emu.atlas" },
+  { alias: "kangaroo-atlas", src: "assets/Kangaroo.atlas" },
+  { alias: "emuGlow-atlas", src: "assets/EmuSilverWinGlow.atlas" },
+  { alias: "emu", src: "assets/Emu.json" },
+  { alias: "kangaroo", src: "assets/Kangaroo.json" },
+  { alias: "emuGlow", src: "assets/EmuSilverWinGlow.json" },
+]);
+
+for (let i = 0; i < 6; i++) {
+  const emuSpine = Spine.from({ skeleton: "emu", atlas: "emu-atlas" });
+  emuSpine.autoUpdate = false;
+  emuSpine.visible = false;
+  spinePool.emu.push(emuSpine);
+
+  const kangarooSpine = Spine.from({
+    skeleton: "kangaroo",
+    atlas: "kangaroo-atlas",
+  });
+  kangarooSpine.autoUpdate = false;
+  kangarooSpine.visible = false;
+  spinePool.kangaroo.push(kangarooSpine);
+}
 
 const scene = new GameScene(app);
 scene.init();
+
+document.getElementById("app").appendChild(app.canvas);
 app.stage.addChild(scene.container);
+
+window.spinePool = spinePool;
+window.app = app;

@@ -39,7 +39,7 @@ export class GameScene {
     );
 
     this.reelSet.onSpinComplete = (result) => {
-      const winResult = this.winChecker.check(result);
+      const winResult = this.winChecker.check(result, this.gameState.bet);
       this.gameState.applyResult(winResult);
       this.balanceUI.update(this.gameState.balance);
       this.spinButton.setEnabled(true);
@@ -82,8 +82,8 @@ export class GameScene {
 
     this.balanceUI.update(this.gameState.balance, this.gameState.bet);
 
-    this.app.ticker.add(() => {
-      this.reelSet.update();
+    this.app.ticker.add((ticker) => {
+      this.reelSet.update(ticker.deltaTime, ticker.deltaMS);
     });
     this.reelSet.reels.forEach((reel) => {
       reel.onStop = () => {

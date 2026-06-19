@@ -33,8 +33,18 @@ export class ReelSet {
       reel.spin(stopAfter);
     });
   }
-  update() {
-    this.reels.forEach((reel) => reel.update());
+
+  update(deltaTime, deltaMS) {
+    this.reels.forEach((reel) => reel.update(deltaTime));
+
+    const spineDelta = deltaMS / 1000;
+    this.reels.forEach((reel) => {
+      reel.symbols.forEach((symbol) => {
+        if (symbol.spine) {
+          symbol.spine.update(spineDelta);
+        }
+      });
+    });
 
     const allStopped = this.reels.every((reel) => !reel.spinning);
     if (allStopped && this.spinning) {
@@ -45,7 +55,6 @@ export class ReelSet {
 
   _onAllStopped() {
     const result = this.reels.map((reel) => reel.getVisibleSymbols());
-
     if (this.onSpinComplete) {
       this.onSpinComplete(result);
     }

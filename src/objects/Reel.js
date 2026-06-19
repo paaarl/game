@@ -45,23 +45,21 @@ export class Reel {
     this.stopAfter = stopAfter;
   }
 
-  update() {
+  update(delta = 1) {
     if (!this.spinning) return;
 
     this.symbols.forEach((s) => {
-      s.container.y += this.speed;
+      s.container.y += this.speed * delta;
     });
 
     this.symbols.forEach((s) => {
       if (s.container.y >= CONFIG.REEL_HEIGHT) {
         s.container.y -= CONFIG.SYMBOLS_PER_REEL * CONFIG.SYMBOL_SIZE;
-        s.value = this._randomSymbol();
-
-        s.container.children[0].text = s.value;
+        s.setValue(this._randomSymbol());
       }
     });
 
-    this.stopAfter--;
+    this.stopAfter -= delta;
     if (this.stopAfter <= 0) {
       this._stop();
     }

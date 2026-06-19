@@ -1,0 +1,18 @@
+EmuSilverWinGlow.png
+size:1075,1145
+filter:Linear,Linear
+pma:true
+Заднее свечение
+bounds:2,547,595,596
+offsets:39,36,669,669
+Переднее свечение
+bounds:2,2,543,544
+offsets:65,62,669,669
+rotate:90
+Рамка
+bounds:548,31,514,514
+offsets:80,77,669,669
+Слот
+bounds:599,665,478,474
+offsets:103,94,669,669
+rotate:90
