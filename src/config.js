@@ -2,15 +2,20 @@ export const CONFIG = {
   SCREEN_WIDTH: 800,
   SCREEN_HEIGHT: 600,
 
-  REEL_COUNT: 3,
-  SYMBOLS_PER_REEL: 5,
+  REEL_COUNT: 5, // ← міняйте кількість барабанів тут
+  VISIBLE_ROWS: 3, // ← міняйте кількість видимих рядів тут
+  SYMBOLS_PER_REEL: 6, // ← має бути >= VISIBLE_ROWS + 2
   SYMBOL_SIZE: 100,
   REEL_WIDTH: 110,
-  REEL_HEIGHT: 300, // 3 символи видно
+  REEL_GAP: 10, // ← відступ між барабанами
 
-  SPIN_SPEED: 25, // пікселів за кадр
-  SPIN_DURATION: 60, // кадрів до зупинки (1й барабан)
-  REEL_STOP_DELAY: 20, // затримка між зупинками барабанів
+  get REEL_HEIGHT() {
+    return this.VISIBLE_ROWS * this.SYMBOL_SIZE;
+  },
+
+  SPIN_SPEED: 25,
+  SPIN_DURATION: 60,
+  REEL_STOP_DELAY: 20,
 
   START_BALANCE: 1000,
   BET_AMOUNT: 10,

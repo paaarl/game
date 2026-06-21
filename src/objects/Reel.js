@@ -35,8 +35,7 @@ export class Reel {
   }
 
   _randomSymbol() {
-    const index = Math.floor(Math.random() * CONFIG.SYMBOLS.length);
-    return CONFIG.SYMBOLS[index];
+    return CONFIG.SYMBOLS[Math.floor(Math.random() * CONFIG.SYMBOLS.length)];
   }
 
   spin(stopAfter) {
@@ -83,7 +82,7 @@ export class Reel {
     return this.symbols
       .filter((s) => s.container.y >= 0 && s.container.y < CONFIG.REEL_HEIGHT)
       .sort((a, b) => a.container.y - b.container.y)
-      .slice(0, 3)
+      .slice(0, CONFIG.VISIBLE_ROWS)
       .map((s) => s.value);
   }
 }

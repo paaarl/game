@@ -13,13 +13,16 @@ export class ReelSet {
 
   _buildReels() {
     for (let i = 0; i < CONFIG.REEL_COUNT; i++) {
-      const x = i * (CONFIG.REEL_WIDTH + 10);
+      const x = i * (CONFIG.REEL_WIDTH + CONFIG.REEL_GAP);
       const reel = new Reel(x);
       this.container.addChild(reel.container);
       this.reels.push(reel);
     }
 
-    const totalWidth = CONFIG.REEL_COUNT * (CONFIG.REEL_WIDTH + 10);
+    const totalWidth =
+      CONFIG.REEL_COUNT * CONFIG.REEL_WIDTH +
+      (CONFIG.REEL_COUNT - 1) * CONFIG.REEL_GAP;
+
     this.container.x = (CONFIG.SCREEN_WIDTH - totalWidth) / 2;
     this.container.y = 0;
   }
@@ -40,7 +43,11 @@ export class ReelSet {
     const spineDelta = deltaMS / 1000;
     this.reels.forEach((reel) => {
       reel.symbols.forEach((symbol) => {
-        if (symbol.spine) {
+        if (!symbol.spine) return;
+
+        // тільки видимі символи (y в межах reel)
+        const y = symbol.container.y;
+        if (y >= 0 && y < CONFIG.REEL_HEIGHT) {
           symbol.spine.update(spineDelta);
         }
       });

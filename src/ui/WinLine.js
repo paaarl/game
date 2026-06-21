@@ -8,7 +8,9 @@ export class WinLine {
   }
 
   _build() {
-    const totalWidth = CONFIG.REEL_COUNT * (CONFIG.REEL_WIDTH + 10);
+    const totalWidth =
+      CONFIG.REEL_COUNT * CONFIG.REEL_WIDTH +
+      (CONFIG.REEL_COUNT - 1) * CONFIG.REEL_GAP;
 
     const leftArrow = new Graphics();
     leftArrow.poly([-30, 0, -10, -15, -10, 15]).fill({ color: 0xe74c3c });

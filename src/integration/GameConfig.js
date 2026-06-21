@@ -51,11 +51,13 @@ export class GameScene {
         this.audio.playWin();
         this.winMessage.show(winResult.symbol, winResult.payout);
 
+        const midRow = Math.floor(CONFIG.VISIBLE_ROWS / 2);
+
         this.reelSet.reels.forEach((reel) => {
           const middleSymbol = reel.symbols.find(
             (s) =>
-              s.container.y >= CONFIG.SYMBOL_SIZE &&
-              s.container.y < CONFIG.SYMBOL_SIZE * 2,
+              s.container.y >= CONFIG.SYMBOL_SIZE * midRow &&
+              s.container.y < CONFIG.SYMBOL_SIZE * (midRow + 1),
           );
           if (middleSymbol) {
             middleSymbol.playWin(this.app);
