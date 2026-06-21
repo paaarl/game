@@ -1,4 +1,5 @@
 import { Container, Graphics } from "pixi.js";
+import { BlurFilter } from "pixi.js";
 import { CONFIG } from "../config.js";
 import { Symbol } from "./Symbol.js";
 
@@ -12,6 +13,13 @@ export class Reel {
     this.spinning = false;
     this.speed = 0;
     this.stopAfter = 0;
+
+    this._blurFilter = new BlurFilter();
+    this._blurFilter.blurY = 0;
+    this._blurFilter.blurX = 0;
+    this._blurFilter.resolution = Math.max(window.devicePixelRatio || 1, 2);
+
+    this.container.filters = [this._blurFilter];
 
     this._buildMask();
     this._buildSymbols();
@@ -42,10 +50,20 @@ export class Reel {
     this.spinning = true;
     this.speed = CONFIG.SPIN_SPEED;
     this.stopAfter = stopAfter;
+    this.container.filters = [this._blurFilter]; // ← вішаємо назад
   }
 
   update(delta = 1) {
-    if (!this.spinning) return;
+    if (!this.spinning) {
+      // плавно прибираємо blur після зупинки
+      if (this._blurFilter.blurY > 0) {
+        this._blurFilter.blurY = Math.max(0, this._blurFilter.blurY - 2);
+        if (this._blurFilter.blurY === 0) {
+          this.container.filters = []; // ← знімаємо фільтр повністю
+        }
+      }
+      return;
+    }
 
     this.symbols.forEach((s) => {
       s.container.y += this.speed * delta;
@@ -57,6 +75,10 @@ export class Reel {
         s.setValue(this._randomSymbol());
       }
     });
+
+    const targetBlur = Math.min((this.speed / CONFIG.SPIN_SPEED) * 20, 20);
+    this._blurFilter.blurY = targetBlur;
+    this._blurFilter.blurX = 0;
 
     this.stopAfter -= delta;
     if (this.stopAfter <= 0) {

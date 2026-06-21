@@ -12,8 +12,7 @@ await app.init({
   width: CONFIG.SCREEN_WIDTH,
   height: CONFIG.SCREEN_HEIGHT,
   background: 0x1a1a2e,
-  // resolution: Math.max(window.devicePixelRatio || 1, 2),
-  resolution: window.devicePixelRatio || 1, // прибрати примусову двійку
+  resolution: Math.max(window.devicePixelRatio || 1, 2),
   autoDensity: true,
 });
 

@@ -15,7 +15,7 @@ class Particle {
     this.x = x;
     this.y = y;
     this.vx = Math.cos(angle) * speed;
-    this.vy = Math.sin(angle) * speed - 4; // трохи вверх
+    this.vy = Math.sin(angle) * speed - 4;
     this.gravity = 0.2;
     this.life = 1;
     this.decay = 0.02 + Math.random() * 0.02;
@@ -29,7 +29,7 @@ class Particle {
 
   _draw() {
     this.gfx.clear();
-    // чергуємо форми — квадрат або кружок
+
     if (Math.random() > 0.5) {
       this.gfx
         .rect(-this.size / 2, -this.size / 2, this.size, this.size)
@@ -65,7 +65,6 @@ export class ParticleEmitter {
     this._pool = [];
   }
 
-  // x, y — координати в глобальному просторі
   burst(x, y, count = 30) {
     for (let i = 0; i < count; i++) {
       const p = this._pool.length > 0 ? this._pool.pop() : new Particle();
@@ -85,7 +84,7 @@ export class ParticleEmitter {
 
       if (p.dead) {
         this.container.removeChild(p.gfx);
-        this._pool.push(p); // повертаємо в пул
+        this._pool.push(p);
         this._particles.splice(i, 1);
       }
     }
