@@ -10,6 +10,7 @@ import { WinLine } from "../ui/WinLine.js";
 import { WinMessage } from "../ui/WinMessage.js";
 import { AudioManager } from "../audio/AudioManager.js";
 import { ParticleEmitter } from "../effects/ParticleEmitter.js";
+import { MuteButton } from "../ui/MuteButton.js";
 
 export class GameScene {
   constructor(app) {
@@ -28,9 +29,12 @@ export class GameScene {
     this.winMessage = new WinMessage();
     this.audio = new AudioManager();
     this.particles = new ParticleEmitter();
+    this.muteButton = new MuteButton();
 
     this.audio.loadMusic("public/assets/bg-music.mp3");
-
+    this.muteButton.onToggle = (muted) => {
+      this.audio.setMuted(muted);
+    };
     this.balanceUI.onBetChange(
       () => {
         this.gameState.increaseBet();
@@ -93,6 +97,7 @@ export class GameScene {
     this.container.addChild(this.balanceUI.container);
     this.container.addChild(this.winMessage.container);
     this.container.addChild(this.particles.container);
+    this.container.addChild(this.muteButton.container);
     this.balanceUI.update(this.gameState.balance, this.gameState.bet);
 
     this.app.ticker.add((ticker) => {

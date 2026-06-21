@@ -52,6 +52,11 @@ export class AudioManager {
     }
   }
 
+  setMuted(muted) {
+    if (!this.musicGain) return;
+    this.musicGain.gain.setValueAtTime(muted ? 0 : 0.1, this.ctx.currentTime);
+  }
+
   _playTone(frequency, duration, type = "sine", volume = 0.3) {
     const oscillator = this.ctx.createOscillator();
     const gainNode = this.ctx.createGain();
