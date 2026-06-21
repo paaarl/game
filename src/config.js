@@ -2,7 +2,7 @@ export const CONFIG = {
   SCREEN_WIDTH: 800,
   SCREEN_HEIGHT: 600,
 
-  REEL_COUNT: 5, // ← міняйте кількість барабанів тут
+  REEL_COUNT: 3, // ← міняйте кількість барабанів тут
   VISIBLE_ROWS: 3, // ← міняйте кількість видимих рядів тут
   SYMBOLS_PER_REEL: 6, // ← має бути >= VISIBLE_ROWS + 2
   SYMBOL_SIZE: 100,

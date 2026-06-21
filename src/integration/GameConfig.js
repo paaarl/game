@@ -9,6 +9,7 @@ import { ReelBackground } from "../ui/ReelBackground.js";
 import { WinLine } from "../ui/WinLine.js";
 import { WinMessage } from "../ui/WinMessage.js";
 import { AudioManager } from "../audio/AudioManager.js";
+import { ParticleEmitter } from "../effects/ParticleEmitter.js";
 
 export class GameScene {
   constructor(app) {
@@ -26,6 +27,7 @@ export class GameScene {
     this.winLine = new WinLine();
     this.winMessage = new WinMessage();
     this.audio = new AudioManager();
+    this.particles = new ParticleEmitter();
 
     this.audio.loadMusic("public/assets/bg-music.mp3");
 
@@ -61,6 +63,12 @@ export class GameScene {
           );
           if (middleSymbol) {
             middleSymbol.playWin(this.app);
+
+            const globalPos = middleSymbol.container.toGlobal({
+              x: CONFIG.SYMBOL_SIZE / 2,
+              y: CONFIG.SYMBOL_SIZE / 2,
+            });
+            this.particles.burst(globalPos.x, globalPos.y, 40);
           }
         });
       }
@@ -84,11 +92,12 @@ export class GameScene {
     this.container.addChild(this.spinButton.container);
     this.container.addChild(this.balanceUI.container);
     this.container.addChild(this.winMessage.container);
-
+    this.container.addChild(this.particles.container);
     this.balanceUI.update(this.gameState.balance, this.gameState.bet);
 
     this.app.ticker.add((ticker) => {
       this.reelSet.update(ticker.deltaTime, ticker.deltaMS);
+      this.particles.update();
     });
 
     this.reelSet.reels.forEach((reel) => {
