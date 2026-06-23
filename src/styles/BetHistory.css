@@ -1,0 +1,183 @@
+/* ── Кнопка виклику історії ── */
+.history-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  background: rgba(124, 58, 237, 0.12);
+  font-size: 17px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.history-btn:hover {
+  background: rgba(124, 58, 237, 0.25);
+  border-color: var(--purple);
+  box-shadow: 0 0 12px var(--purple-glow);
+}
+
+/* ── Задній фон (Overlay) ── */
+.history-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Головна панель вікна ── */
+.history-panel {
+  width: 480px;
+  max-width: 90%;
+  max-height: 420px;
+  border-radius: 16px;
+  background: rgba(10, 6, 24, 0.97);
+  border: 1px solid rgba(240, 192, 64, 0.25);
+  box-shadow:
+    0 0 40px rgba(240, 192, 64, 0.1),
+    0 24px 64px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(240, 192, 64, 0.12);
+}
+
+.history-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  text-shadow: 0 0 12px var(--gold-glow);
+}
+
+.history-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.history-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* ── Список та Скроллбар ── */
+.history-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px 0;
+}
+
+.history-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: rgba(240, 192, 64, 0.2);
+  border-radius: 2px;
+}
+
+/* ── Рядки таблиці (Grid) ── */
+.history-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr 1fr;
+  align-items: center;
+  padding: 8px 20px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.1s;
+}
+
+.history-row:hover:not(.history-head) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.history-head {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(139, 122, 160, 0.6);
+  border-bottom: 1px solid rgba(240, 192, 64, 0.1);
+  padding-bottom: 10px;
+}
+
+/* ── Елементи стану (Виграш / Програш) ── */
+.history-win {
+  color: var(--text);
+}
+
+.history-loss {
+  opacity: 0.65;
+}
+
+.history-time {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.history-symbol {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.history-win .history-symbol {
+  color: var(--gold);
+}
+
+.history-payout-win {
+  color: var(--green);
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-shadow: 0 0 8px var(--green-glow);
+}
+
+.history-payout-loss {
+  color: var(--red);
+  font-family: var(--font-display);
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+/* ── Порожній стан ── */
+.history-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}

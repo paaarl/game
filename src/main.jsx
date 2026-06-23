@@ -1,10 +1,14 @@
 import "./style.css";
+import "./Scaler.js";
+
 import { Application, Assets } from "pixi.js";
 import "@esotericsoftware/spine-pixi-v8";
 import { Spine } from "@esotericsoftware/spine-pixi-v8";
 import { CONFIG } from "./config.js";
 import { GameScene } from "./integration/GameConfig.js";
 import { spinePool } from "./objects/Symbol.js";
+import { createRoot } from "react-dom/client";
+import { App } from "./ui/react/App.jsx";
 
 const app = new Application();
 
@@ -46,8 +50,10 @@ for (let i = 0; i < 6; i++) {
 const scene = new GameScene(app);
 scene.init();
 
-document.getElementById("app").appendChild(app.canvas);
+document.getElementById("pixi-container").appendChild(app.canvas);
 app.stage.addChild(scene.container);
+
+createRoot(document.getElementById("ui-root")).render(<App />);
 
 window.spinePool = spinePool;
 window.app = app;

@@ -1,108 +1,175 @@
-import { Container } from "pixi.js";
+import { Container, Sprite, Assets } from "pixi.js";
 import { CONFIG } from "../config.js";
 import { ReelSet } from "../objects/ReelSet.js";
 import { WinChecker } from "../logic/WinChecker.js";
 import { GameState } from "../state/GameState.js";
-import { SpinButton } from "../ui/SpinButton.js";
-import { BalanceUI } from "../ui/BalanceUI.js";
 import { ReelBackground } from "../ui/ReelBackground.js";
 import { WinLine } from "../ui/WinLine.js";
-import { WinMessage } from "../ui/WinMessage.js";
 import { AudioManager } from "../audio/AudioManager.js";
 import { ParticleEmitter } from "../effects/ParticleEmitter.js";
-import { MuteButton } from "../ui/MuteButton.js";
+import { useGameStore, registerActions } from "../store/gameStore.js";
+
+// Копіюємо сюди карту ліній, щоб сцена знала, які саме символи затемнювати, а які підсвічувати
+const SCENE_PAYLINES = [
+  [1, 1, 1, 1, 1], // 0: Пряма по центру
+  [0, 0, 0, 0, 0], // 1: Пряма зверху
+  [2, 2, 2, 2, 2], // 2: Пряма знизу
+  [0, 1, 2, 1, 0], // 3: Зигзаг зверху вниз
+  [2, 1, 0, 1, 2], // 4: Зигзаг знизу вгору
+  [0, 0, 1, 0, 0], // 5: Прогин зверху
+  [2, 2, 1, 2, 2], // 6: Прогин знизу
+  [1, 0, 0, 0, 1], // 8: Сходинка вгору
+  [1, 2, 2, 2, 1], // 9: Сходинка вниз
+  [1, 1, 0, 1, 1], // 10: Підйом по центру
+];
 
 export class GameScene {
   constructor(app) {
     this.app = app;
     this.container = new Container();
+    this._muted = false;
+    this._winAnimationTimer = 0;
+    this._isWinAnimating = false;
   }
 
-  init() {
+  async init() {
     this.gameState = new GameState();
     this.winChecker = new WinChecker();
     this.reelSet = new ReelSet();
-    this.spinButton = new SpinButton();
-    this.balanceUI = new BalanceUI();
-    this.reelBackground = new ReelBackground();
     this.winLine = new WinLine();
-    this.winMessage = new WinMessage();
     this.audio = new AudioManager();
     this.particles = new ParticleEmitter();
-    this.muteButton = new MuteButton();
+
+    try {
+      const globalBgTexture = await Assets.load("public/assets/bg-global.png");
+      const globalBg = new Sprite(globalBgTexture);
+      globalBg.width = this.app.screen.width;
+      globalBg.height = this.app.screen.height;
+      this.container.addChild(globalBg);
+    } catch (e) {
+      console.error("Не вдалося завантажити глобальний фон:", e);
+    }
+
+    this.reelBackground = new ReelBackground();
+    await this.reelBackground.init();
 
     this.audio.loadMusic("public/assets/bg-music.mp3");
-    this.muteButton.onToggle = (muted) => {
-      this.audio.setMuted(muted);
-    };
-    this.balanceUI.onBetChange(
-      () => {
+
+    registerActions({
+      onSpinClick: () => this._handleSpinClick(),
+      onBetIncrease: () => {
         this.gameState.increaseBet();
-        this.balanceUI.update(this.gameState.balance, this.gameState.bet);
+        useGameStore
+          .getState()
+          .setBalance(this.gameState.balance, this.gameState.bet);
       },
-      () => {
+      onBetDecrease: () => {
         this.gameState.decreaseBet();
-        this.balanceUI.update(this.gameState.balance, this.gameState.bet);
+        useGameStore
+          .getState()
+          .setBalance(this.gameState.balance, this.gameState.bet);
       },
-    );
+      onMuteToggle: () => {
+        this._muted = !this._muted;
+        this.audio.setMuted(this._muted);
+        useGameStore.getState().setMuted(this._muted);
+      },
+    });
 
     this.reelSet.onSpinComplete = (result) => {
       const winResult = this.winChecker.check(result, this.gameState.bet);
       this.gameState.applyResult(winResult);
-      this.balanceUI.update(this.gameState.balance);
-      this.spinButton.setEnabled(true);
+      useGameStore.getState().setBalance(this.gameState.balance);
+      useGameStore.getState().setSpinEnabled(true);
+
+      useGameStore
+        .getState()
+        .addHistoryEntry(
+          this.gameState.bet,
+          winResult.win,
+          winResult.payout,
+          winResult.symbol,
+        );
+
       this.gameState.reset();
 
       if (winResult.win) {
         this.audio.playWin();
-        this.winMessage.show(winResult.symbol, winResult.payout);
+        useGameStore
+          .getState()
+          .showWinMessage(winResult.symbol, winResult.payout);
 
-        const midRow = Math.floor(CONFIG.VISIBLE_ROWS / 2);
+        this._isWinAnimating = true;
+        setTimeout(() => {
+          useGameStore.getState().hideWinMessage();
+          this._resetWinAnimation();
+        }, 4000);
 
-        this.reelSet.reels.forEach((reel) => {
-          const middleSymbol = reel.symbols.find(
-            (s) =>
-              s.container.y >= CONFIG.SYMBOL_SIZE * midRow &&
-              s.container.y < CONFIG.SYMBOL_SIZE * (midRow + 1),
-          );
-          if (middleSymbol) {
-            middleSymbol.playWin(this.app);
+        const totalWidth = CONFIG.REEL_COUNT * (CONFIG.REEL_WIDTH + 10);
+        const startX = (CONFIG.SCREEN_WIDTH - totalWidth) / 2;
+        const startY = 100;
 
-            const globalPos = middleSymbol.container.toGlobal({
-              x: CONFIG.SYMBOL_SIZE / 2,
-              y: CONFIG.SYMBOL_SIZE / 2,
+        if (winResult.lineId !== undefined) {
+          // 1. Малюємо лінію
+          this.winLine.showLine(winResult.lineId, startX, startY);
+
+          // 2. Отримуємо правильну карту виграшної лінії (наприклад, [1, 1, 1, 1, 1])
+          const currentLinePattern = SCENE_PAYLINES[winResult.lineId];
+
+          // 3. Проходимо по ВСІХ барабанах і символах
+          this.reelSet.reels.forEach((reel, reelIndex) => {
+            const targetRowIndex = currentLinePattern[reelIndex]; // Який рядок має виграти на цьому барабані (0, 1 або 2)
+
+            reel.symbols.forEach((symbol) => {
+              // Визначаємо РЕАЛЬНИЙ індекс рядка символу за його координатою Y на барабані
+              const realRowIndex = Math.round(
+                symbol.container.y / CONFIG.SYMBOL_SIZE,
+              );
+
+              if (realRowIndex === targetRowIndex) {
+                symbol.playWin(this.app);
+                symbol.container.alpha = 1.0;
+
+                for (let i = 0; i < 3; i++) {
+                  setTimeout(() => {
+                    if (!this._isWinAnimating) return;
+                    const globalPos = symbol.container.toGlobal({
+                      x: CONFIG.SYMBOL_SIZE / 2,
+                      y: CONFIG.SYMBOL_SIZE / 2,
+                    });
+                    this.particles.burst(globalPos.x, globalPos.y, 15);
+                  }, i * 400);
+                }
+              } else {
+                symbol.container.alpha = 0.25;
+              }
             });
-            this.particles.burst(globalPos.x, globalPos.y, 40);
-          }
-        });
+          });
+        }
       }
-    };
-
-    this.spinButton.onClick = () => {
-      if (!this.gameState.canSpin()) return;
-
-      this.audio.playMusic();
-      this.audio.playSpin();
-
-      this.gameState.startSpin();
-      this.balanceUI.update(this.gameState.balance);
-      this.spinButton.setEnabled(false);
-      this.reelSet.spin();
     };
 
     this.container.addChild(this.reelBackground.container);
     this.container.addChild(this.reelSet.container);
     this.container.addChild(this.winLine.container);
-    this.container.addChild(this.spinButton.container);
-    this.container.addChild(this.balanceUI.container);
-    this.container.addChild(this.winMessage.container);
     this.container.addChild(this.particles.container);
-    this.container.addChild(this.muteButton.container);
-    this.balanceUI.update(this.gameState.balance, this.gameState.bet);
+
+    useGameStore
+      .getState()
+      .setBalance(this.gameState.balance, this.gameState.bet);
 
     this.app.ticker.add((ticker) => {
       this.reelSet.update(ticker.deltaTime, ticker.deltaMS);
       this.particles.update();
+
+      if (this._isWinAnimating) {
+        this._winAnimationTimer += ticker.deltaTime * 0.1;
+        this.winLine.lineGraphics.alpha =
+          0.7 + Math.sin(this._winAnimationTimer) * 0.3;
+        this.winLine.lineGraphics.scale.set(
+          1 + Math.sin(this._winAnimationTimer) * 0.005,
+        );
+      }
     });
 
     this.reelSet.reels.forEach((reel) => {
@@ -110,5 +177,32 @@ export class GameScene {
         this.audio.playTick();
       };
     });
+  }
+
+  _resetWinAnimation() {
+    this._isWinAnimating = false;
+    this.winLine.clear();
+    this.winLine.lineGraphics.alpha = 1;
+    this.winLine.lineGraphics.scale.set(1);
+
+    this.reelSet.reels.forEach((reel) => {
+      reel.symbols.forEach((symbol) => {
+        symbol.container.alpha = 1;
+      });
+    });
+  }
+
+  _handleSpinClick() {
+    if (!this.gameState.canSpin()) return;
+
+    this._resetWinAnimation();
+
+    this.audio.playMusic();
+    this.audio.playSpin();
+
+    this.gameState.startSpin();
+    useGameStore.getState().setBalance(this.gameState.balance);
+    useGameStore.getState().setSpinEnabled(false);
+    this.reelSet.spin();
   }
 }

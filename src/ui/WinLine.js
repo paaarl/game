@@ -1,37 +1,55 @@
 import { Container, Graphics } from "pixi.js";
 import { CONFIG } from "../config.js";
 
+const PAYLINES = [
+  [1, 1, 1, 1, 1], // 0: Пряма по центру
+  [0, 0, 0, 0, 0], // 1: Пряма зверху
+  [2, 2, 2, 2, 2], // 2: Пряма знизу
+  [0, 1, 2, 1, 0], // 3: Зигзаг зверху вниз
+  [2, 1, 0, 1, 2], // 4: Зигзаг знизу вгору
+  [0, 0, 1, 0, 0], // 5: Прогин зверху
+  [2, 2, 1, 2, 2], // 6: Прогин знизу
+  [1, 0, 0, 0, 1], // 7: Сходинка вгору
+  [1, 2, 2, 2, 1], // 8: Сходинка вниз
+  [1, 1, 0, 1, 1], // 9: Підйом по центру
+];
+
 export class WinLine {
   constructor() {
     this.container = new Container();
-    this._build();
+    this.lineGraphics = new Graphics();
+    this.container.addChild(this.lineGraphics);
   }
 
-  _build() {
-    const totalWidth =
-      CONFIG.REEL_COUNT * CONFIG.REEL_WIDTH +
-      (CONFIG.REEL_COUNT - 1) * CONFIG.REEL_GAP;
+  showLine(lineIndex, startX, startY) {
+    this.clear();
 
-    const leftArrow = new Graphics();
-    leftArrow.poly([-30, 0, -10, -15, -10, 15]).fill({ color: 0xe74c3c });
+    const linePattern = PAYLINES[lineIndex];
+    if (!linePattern) return;
 
-    const rightArrow = new Graphics();
-    rightArrow
-      .poly([totalWidth + 30, 0, totalWidth + 10, -15, totalWidth + 10, 15])
-      .fill({ color: 0xe74c3c });
+    this.lineGraphics.stroke({
+      color: 0xf0c040,
+      width: 5,
+      cap: "round",
+      join: "round",
+    });
 
-    const leftLine = new Graphics();
-    leftLine.rect(-10, -2, 15, 4).fill({ color: 0xe74c3c });
+    const stepX = CONFIG.REEL_WIDTH + 10;
+    const stepY = CONFIG.SYMBOL_SIZE;
 
-    const rightLine = new Graphics();
-    rightLine.rect(totalWidth - 5, -2, 15, 4).fill({ color: 0xe74c3c });
+    linePattern.forEach((rowIndex, reelIndex) => {
+      const x = startX + reelIndex * stepX + CONFIG.REEL_WIDTH / 2;
+      const y = startY + rowIndex * stepY + CONFIG.SYMBOL_SIZE / 2;
 
-    this.container.addChild(leftArrow);
-    this.container.addChild(rightArrow);
-    this.container.addChild(leftLine);
-    this.container.addChild(rightLine);
+      if (reelIndex === 0) {
+        this.lineGraphics.moveTo(x, y);
+      } else {
+        this.lineGraphics.lineTo(x, y);
+      }
+    });
+  }
 
-    this.container.x = (CONFIG.SCREEN_WIDTH - totalWidth) / 2;
-    this.container.y = 100 + CONFIG.REEL_HEIGHT / 2;
+  clear() {
+    this.lineGraphics.clear();
   }
 }
