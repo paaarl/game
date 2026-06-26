@@ -40,16 +40,6 @@ export class GameScene {
     this.audio = new AudioManager();
     this.particles = new ParticleEmitter();
 
-    try {
-      const globalBgTexture = await Assets.load("public/assets/bg-global.png");
-      const globalBg = new Sprite(globalBgTexture);
-      globalBg.width = this.app.screen.width;
-      globalBg.height = this.app.screen.height;
-      this.container.addChild(globalBg);
-    } catch (e) {
-      console.error("Не вдалося завантажити глобальний фон:", e);
-    }
-
     this.reelBackground = new ReelBackground();
     await this.reelBackground.init();
 
@@ -110,18 +100,14 @@ export class GameScene {
         const startY = 100;
 
         if (winResult.lineId !== undefined) {
-          // 1. Малюємо лінію
           this.winLine.showLine(winResult.lineId, startX, startY);
 
-          // 2. Отримуємо правильну карту виграшної лінії (наприклад, [1, 1, 1, 1, 1])
           const currentLinePattern = SCENE_PAYLINES[winResult.lineId];
 
-          // 3. Проходимо по ВСІХ барабанах і символах
           this.reelSet.reels.forEach((reel, reelIndex) => {
-            const targetRowIndex = currentLinePattern[reelIndex]; // Який рядок має виграти на цьому барабані (0, 1 або 2)
+            const targetRowIndex = currentLinePattern[reelIndex];
 
             reel.symbols.forEach((symbol) => {
-              // Визначаємо РЕАЛЬНИЙ індекс рядка символу за його координатою Y на барабані
               const realRowIndex = Math.round(
                 symbol.container.y / CONFIG.SYMBOL_SIZE,
               );

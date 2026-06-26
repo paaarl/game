@@ -20,15 +20,11 @@ export class WinChecker {
     let winningLines = [];
     let mainWinningSymbol = null;
 
-    // Проходимо по кожній із 10 ліній
     PAYLINES.forEach((linePattern, lineIndex) => {
-      // Збираємо символи, які лежать на поточній лінії
-      // result[reelIndex][rowIndex]
       const symbolsOnLine = linePattern.map((rowIndex, reelIndex) => {
         return result[reelIndex][rowIndex];
       });
 
-      // Перевіряємо, чи всі 5 символів на цій лінії однакові
       const isWin = symbolsOnLine.every(
         (symbol) => symbol === symbolsOnLine[0],
       );
@@ -36,26 +32,20 @@ export class WinChecker {
       if (isWin) {
         const symbol = symbolsOnLine[0];
 
-        // Розраховуємо виплату для цієї конкретної лінії
-        // (Оскільки ліній 10, зазвичай ставку ділять на 10, або рахують як betPerLine.
-        //  Давай поки рахувати від загальної ставки, як у тебе було)
         const linePayout = (CONFIG.PAYOUTS[symbol] || 0) * bet;
 
         totalPayout += linePayout;
-        mainWinningSymbol = symbol; // Запам'ятовуємо символ для виведення на екран
+        mainWinningSymbol = symbol;
 
-        // Додаємо індекс лінії у список тих, що виграли
         winningLines.push(lineIndex);
       }
     });
 
-    // Якщо хоча б одна лінія виграла
     if (winningLines.length > 0) {
       return {
         win: true,
         symbol: mainWinningSymbol,
         payout: totalPayout,
-        // Повертаємо ПЕРШУ лінію, що виграла, для малювання (або можна переробити малювання під масив)
         lineId: winningLines[0],
       };
     }

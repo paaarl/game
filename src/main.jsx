@@ -9,19 +9,20 @@ import { GameScene } from "./integration/GameConfig.js";
 import { spinePool } from "./objects/Symbol.js";
 import { createRoot } from "react-dom/client";
 import { App } from "./ui/react/App.jsx";
+import { rescale } from "./Scaler.js";
 
 const app = new Application();
 
 await app.init({
   width: CONFIG.SCREEN_WIDTH,
   height: CONFIG.SCREEN_HEIGHT,
-  background: 0x1a1a2e,
   resolution: Math.max(window.devicePixelRatio || 1, 2),
   autoDensity: true,
+  backgroundAlpha: 0,
 });
 
-app.canvas.style.width = "100%";
-app.canvas.style.height = "100%";
+// app.canvas.style.width = "100%";
+// app.canvas.style.height = "100%";
 
 await Assets.load([
   { alias: "emu-atlas", src: "assets/Emu.atlas" },
@@ -51,6 +52,8 @@ const scene = new GameScene(app);
 scene.init();
 
 document.getElementById("pixi-container").appendChild(app.canvas);
+rescale();
+
 app.stage.addChild(scene.container);
 
 createRoot(document.getElementById("ui-root")).render(<App />);
