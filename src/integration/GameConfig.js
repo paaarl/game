@@ -95,10 +95,11 @@ export class GameScene {
           this._resetWinAnimation();
         }, 4000);
 
-        const totalWidth = CONFIG.REEL_COUNT * (CONFIG.REEL_WIDTH + 10);
+        const totalWidth =
+          CONFIG.REEL_COUNT * CONFIG.REEL_WIDTH +
+          (CONFIG.REEL_COUNT - 1) * CONFIG.REEL_GAP;
         const startX = (CONFIG.SCREEN_WIDTH - totalWidth) / 2;
-        const startY = 100;
-
+        const startY = (CONFIG.SCREEN_HEIGHT - CONFIG.REEL_HEIGHT) / 2;
         if (winResult.lineId !== undefined) {
           this.winLine.showLine(winResult.lineId, startX, startY);
 

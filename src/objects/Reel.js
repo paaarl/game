@@ -7,7 +7,7 @@ export class Reel {
   constructor(x) {
     this.container = new Container();
     this.container.x = x;
-    this.container.y = 100;
+    this.container.y = 0; // керує ReelSet
 
     this.symbols = [];
     this.spinning = false;
@@ -50,16 +50,15 @@ export class Reel {
     this.spinning = true;
     this.speed = CONFIG.SPIN_SPEED;
     this.stopAfter = stopAfter;
-    this.container.filters = [this._blurFilter]; // ← вішаємо назад
+    this.container.filters = [this._blurFilter];
   }
 
   update(delta = 1) {
     if (!this.spinning) {
-      // плавно прибираємо blur після зупинки
       if (this._blurFilter.blurY > 0) {
         this._blurFilter.blurY = Math.max(0, this._blurFilter.blurY - 2);
         if (this._blurFilter.blurY === 0) {
-          this.container.filters = []; // ← знімаємо фільтр повністю
+          this.container.filters = [];
         }
       }
       return;

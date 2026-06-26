@@ -2,12 +2,23 @@ export const CONFIG = {
   SCREEN_WIDTH: 800,
   SCREEN_HEIGHT: 600,
 
-  REEL_COUNT: 5, // ← міняйте кількість барабанів тут
-  VISIBLE_ROWS: 3, // ← міняйте кількість видимих рядів тут
-  SYMBOLS_PER_REEL: 6, // ← має бути >= VISIBLE_ROWS + 2
-  SYMBOL_SIZE: 100,
-  REEL_WIDTH: 110,
-  REEL_GAP: 5, // ← відступ між барабанами
+  REEL_COUNT: 5,
+  VISIBLE_ROWS: 3,
+  SYMBOLS_PER_REEL: 6,
+  REEL_GAP: 5,
+
+  REEL_PADDING: 20, // padding рамки з обох боків
+
+  get REEL_WIDTH() {
+    const totalGaps = (this.REEL_COUNT - 1) * this.REEL_GAP;
+    // Враховуємо padding рамки
+    return Math.floor(
+      (this.SCREEN_WIDTH - totalGaps - this.REEL_PADDING * 2) / this.REEL_COUNT,
+    );
+  },
+  get SYMBOL_SIZE() {
+    return this.REEL_WIDTH;
+  },
 
   get REEL_HEIGHT() {
     return this.VISIBLE_ROWS * this.SYMBOL_SIZE;

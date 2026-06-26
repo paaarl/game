@@ -50,7 +50,6 @@ export class Symbol {
       this._buildText();
     }
   }
-
   _buildSpine() {
     const alias = SPINE_MAP[this.value];
     this.spineAlias = alias;
@@ -58,9 +57,13 @@ export class Symbol {
     this.spine = getFromPool(alias);
     this.spine.visible = true;
 
-    this.spine.scale.set(0.18);
+    const targetSize = CONFIG.SYMBOL_SIZE * 1.1;
+    const spineNativeHeight = 600;
+    const scale = targetSize / spineNativeHeight;
+
+    this.spine.scale.set(scale);
     this.spine.x = CONFIG.SYMBOL_SIZE / 2;
-    this.spine.y = CONFIG.SYMBOL_SIZE;
+    this.spine.y = CONFIG.SYMBOL_SIZE * 0.95;
 
     this.spine.state.setAnimation(0, `${this._animName()}_idle`, true);
     this.container.addChild(this.spine);
@@ -72,7 +75,7 @@ export class Symbol {
 
     const text = new Text({
       text: this.value,
-      style: { fontSize: CONFIG.SYMBOL_SIZE * 0.7 },
+      style: { fontSize: CONFIG.SYMBOL_SIZE * 0.9 },
     });
 
     text.anchor.set(0.5);

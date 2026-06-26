@@ -10,7 +10,6 @@ export class ReelSet {
 
     this._buildReels();
   }
-
   _buildReels() {
     for (let i = 0; i < CONFIG.REEL_COUNT; i++) {
       const x = i * (CONFIG.REEL_WIDTH + CONFIG.REEL_GAP);
@@ -23,10 +22,10 @@ export class ReelSet {
       CONFIG.REEL_COUNT * CONFIG.REEL_WIDTH +
       (CONFIG.REEL_COUNT - 1) * CONFIG.REEL_GAP;
 
+    // Тепер рамка і барабани рахують від одного REEL_PADDING
     this.container.x = (CONFIG.SCREEN_WIDTH - totalWidth) / 2;
-    this.container.y = 0;
+    this.container.y = (CONFIG.SCREEN_HEIGHT - CONFIG.REEL_HEIGHT) / 2;
   }
-
   spin() {
     if (this.spinning) return;
     this.spinning = true;
@@ -44,8 +43,6 @@ export class ReelSet {
     this.reels.forEach((reel) => {
       reel.symbols.forEach((symbol) => {
         if (!symbol.spine) return;
-
-        // тільки видимі символи (y в межах reel)
         const y = symbol.container.y;
         if (y >= 0 && y < CONFIG.REEL_HEIGHT) {
           symbol.spine.update(spineDelta);
